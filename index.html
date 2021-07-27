@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <input type='file' onchange='convertToBase64()'>
+        <button onclick='convertToForm()'>送信</button>
+        <img src="" alt="">
+    </div>
+
+    <script lang='js'>
+        function convertToBase64 () {
+            const file = document.querySelector('input[type=file]').files[0]
+            const preview = document.querySelector('img');
+            const reader = new FileReader()
+            reader.addEventListener('load', () => {
+                preview.src = reader.result;
+            })
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function convertToForm () {
+            const $inputFile = document.querySelector('input[type=file]').files[0]
+            const $img = document.querySelector('img')
+            const imgData = $img.src
+
+            const imgFile = _convertToFile(imgData, $inputFile)
+
+            const fd = new FormData()
+            fd.append('image', imgFile)
+
+            console.log(fd.get('image')); // File情報
+
+            // fileを送信
+            fetch('URL', {
+                method: 'POST',
+                body: fd
+            })
+        }
+
+        function _convertToFile (imgData, file) {
+            const blob = atob(imgData.replace(/^.*,/, ''));
+            let buffer = new Uint8Array(blob.length);
+            for (let i = 0; i < blob.length; i++) {
+                buffer[i] = blob.charCodeAt(i);
+            }
+            return new File([buffer.buffer], file.name, {type: file.type});
+        }
+    </script>
+</body>
+</html>
